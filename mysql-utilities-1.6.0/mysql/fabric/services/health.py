@@ -68,11 +68,11 @@ class CheckHealth(Command):
 
         for server in group.servers():
             alive = False
-            is_master = (group.master == server.uuid)
+            is_main = (group.main == server.uuid)
             status = server.status
-            why_slave_issues = {}
+            why_subordinate_issues = {}
             # These are used when server is not contactable.
-            why_slave_issues = {
+            why_subordinate_issues = {
                 'is_not_running': False,
                 'is_not_configured': False,
                 'io_not_running': False,
@@ -83,16 +83,16 @@ class CheckHealth(Command):
             try:
                 server.connect()
                 alive = True
-                if not is_master:
-                    slave_issues, why_slave_issues = \
-                        _replication.check_slave_issues(server)
-                    str_master_uuid = _replication.slave_has_master(server)
-                    if (group.master is None or str(group.master) != \
-                        str_master_uuid) and not slave_issues:
+                if not is_main:
+                    subordinate_issues, why_subordinate_issues = \
+                        _replication.check_subordinate_issues(server)
+                    str_main_uuid = _replication.subordinate_has_main(server)
+                    if (group.main is None or str(group.main) != \
+                        str_main_uuid) and not subordinate_issues:
                         issues.append_row([
-                            "Group has master (%s) but server is connected " \
-                            "to master (%s)." % \
-                            (group.master, str_master_uuid)
+                            "Group has main (%s) but server is connected " \
+                            "to main (%s)." % \
+                            (group.main, str_main_uuid)
                         ])
             except _errors.DatabaseError:
                 status = _server.MySQLServer.FAULTY
@@ -100,12 +100,12 @@ class CheckHealth(Command):
                 server.uuid,
                 alive,
                 status,
-                why_slave_issues['is_not_running'],
-                why_slave_issues['is_not_configured'],
-                why_slave_issues['io_not_running'],
-                why_slave_issues['sql_not_running'],
-                why_slave_issues['io_error'],
-                why_slave_issues['sql_error'],
+                why_subordinate_issues['is_not_running'],
+                why_subordinate_issues['is_not_configured'],
+                why_subordinate_issues['io_not_running'],
+                why_subordinate_issues['sql_not_running'],
+                why_subordinate_issues['io_error'],
+                why_subordinate_issues['sql_error'],
             ])
 
         return CommandResult(None, results=[info, issues])

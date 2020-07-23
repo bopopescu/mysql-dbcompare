@@ -1232,23 +1232,23 @@ class RangeShardingSpecification(_persistence.Persistable):
                     (shard.group_id, )
                 )
 
-            master = MySQLServer.fetch(group.master)
-            if master is None:
+            main = MySQLServer.fetch(group.main)
+            if main is None:
                 raise _errors.ShardingError(
-                    "Group Master not found (%s)" %
-                    (str(group.master))
+                    "Group Main not found (%s)" %
+                    (str(group.main))
                 )
 
-            master.connect()
+            main.connect()
 
             #Dependencies between tables being pruned may lead to the prune
             #failing. Hence we need to disable foreign key checks during the
             #pruning process.
-            master.set_foreign_key_checks(False)
+            main.set_foreign_key_checks(False)
             prune_limit = int(prune_limit)
             deleted = prune_limit
             while deleted == prune_limit:
-                delete_cursor = master.exec_stmt(
+                delete_cursor = main.exec_stmt(
                                               delete_query,
                                               {
                                                 "raw":False,
@@ -1257,7 +1257,7 @@ class RangeShardingSpecification(_persistence.Persistable):
                 )
                 deleted = delete_cursor.rowcount
             #Enable Foreign Key Checking
-            master.set_foreign_key_checks(True)
+            main.set_foreign_key_checks(True)
 
 class HashShardingSpecification(RangeShardingSpecification):
     """Represents a HASH sharding specification. The class helps encapsulate
@@ -1378,16 +1378,16 @@ class HashShardingSpecification(RangeShardingSpecification):
                     (shard.group_id, )
                 )
 
-            master = MySQLServer.fetch(group.master)
-            if master is None:
+            main = MySQLServer.fetch(group.main)
+            if main is None:
                 raise _errors.ShardingError(
-                    "Group Master not found (%s)" %
-                    (group.master, )
+                    "Group Main not found (%s)" %
+                    (group.main, )
                 )
 
-            master.connect()
+            main.connect()
 
-            cur = master.exec_stmt(
+            cur = main.exec_stmt(
                             max_query,
                             {"raw" : False,
                             "fetch" : False,
@@ -1703,23 +1703,23 @@ class HashShardingSpecification(RangeShardingSpecification):
                     (shard.group_id, )
                 )
 
-            master = MySQLServer.fetch(group.master)
-            if master is None:
+            main = MySQLServer.fetch(group.main)
+            if main is None:
                 raise _errors.ShardingError(
-                    "Group Master not found (%s)" %
-                    (group.master, )
+                    "Group Main not found (%s)" %
+                    (group.main, )
                 )
 
-            master.connect()
+            main.connect()
 
             #Dependencies between tables being pruned may lead to the prune
             #failing. Hence we need to disable foreign key checks during the
             #pruning process.
-            master.set_foreign_key_checks(False)
+            main.set_foreign_key_checks(False)
             prune_limit = int(prune_limit)
             deleted = prune_limit
             while deleted == prune_limit:
-                delete_cursor = master.exec_stmt(
+                delete_cursor = main.exec_stmt(
                                               delete_query,
                                               {
                                                 "raw":False,
@@ -1728,7 +1728,7 @@ class HashShardingSpecification(RangeShardingSpecification):
                 )
                 deleted = delete_cursor.rowcount
             #Enable the Foreign Key checks after the prune.
-            master.set_foreign_key_checks(True)
+            main.set_foreign_key_checks(True)
 
 class MappingShardsGroups(_persistence.Persistable):
     """This class defines queries that are used to retrieve information
@@ -1737,7 +1737,7 @@ class MappingShardsGroups(_persistence.Persistable):
 
     The group is used by the lock control system to avoid concurrent
     procedures simultaneously accessing the same group thus causing
-    problems such as setting up a slave of a wrong master while a
+    problems such as setting up a subordinate of a wrong main while a
     switch or fail over is going on.
     """
     # Return the local group associated with a shard_id.

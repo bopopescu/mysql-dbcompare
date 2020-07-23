@@ -133,7 +133,7 @@ def _report_failure(server_id, reporter, error, update_only):
 
 def _set_status_faulty(server, update_only):
     """Set server's status to fauly and trigger a failover if the server
-    is a master.
+    is a main.
 
     This function assumes that the SERVER_LOST event is executed before
     the FAIL_OVER event.
@@ -147,8 +147,8 @@ def _set_status_faulty(server, update_only):
     if not update_only:
         _server.ConnectionPool().purge_connections(server.uuid)
         group = _server.Group.fetch(server.group_id)
-        if group.master == server.uuid:
-            _LOGGER.info("Master (%s) in group (%s) has "
+        if group.main == server.uuid:
+            _LOGGER.info("Main (%s) in group (%s) has "
                          "been lost.", server.uuid, group.group_id)
             _events.trigger_within_procedure("FAIL_OVER", group.group_id)
 
